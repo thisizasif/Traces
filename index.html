@@ -11,6 +11,9 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: pan-x pan-y;
         }
 
         html,
@@ -50,7 +53,23 @@
             mix-blend-mode: multiply;
         }
 
-        /* DATE */
+        /* DRAGGABLE CONTAINER */
+        #date-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: clamp(2000px, 400vw, 5000px);
+            height: clamp(2000px, 400vh, 5000px);
+            transform: translate(-50%, -50%);
+            cursor: grab;
+            will-change: transform;
+        }
+
+        #date-container:active {
+            cursor: grabbing;
+        }
+
+        /* RESPONSIVE DATE STYLES */
         .date {
             position: absolute;
             white-space: nowrap;
@@ -60,18 +79,29 @@
             cursor: default;
             opacity: 0.45;
             text-shadow:
-                1px 1px 0 rgba(25, 22, 18, .95),
-                2px 2px 1px rgba(0, 0, 0, .35),
-                -1px -1px 0 rgba(220, 210, 185, .35);
-            transition: opacity .15s ease;
+                0.5px 0.5px 0 rgba(25, 22, 18, .95),
+                1px 1px 0.5px rgba(0, 0, 0, .35),
+                -0.5px -0.5px 0 rgba(220, 210, 185, .35);
+            transition: opacity .2s ease, transform .2s ease;
+
+            /* Responsive font sizing */
+            font-size: clamp(14px, 1.8vw, 24px);
         }
 
-        /* POPUP */
+        /* Mobile optimization */
+        @media (max-width: 768px) {
+            .date {
+                font-size: clamp(12px, 4vw, 18px);
+                letter-spacing: 0.8px;
+            }
+        }
+
+        /* POPUP - RESPONSIVE */
         .popup {
             position: fixed;
-            max-width: 220px;
+            max-width: min(220px, 90vw);
             padding: 12px 14px;
-            font-size: 13px;
+            font-size: clamp(12px, 1.2vw, 14px);
             line-height: 1.4;
             color: #2e2a23;
             background:
@@ -87,167 +117,486 @@
                 4px 6px 14px rgba(0, 0, 0, .3);
             opacity: 0;
             pointer-events: none;
-            transition: opacity .15s ease;
+            transition: opacity .2s ease, transform .2s ease;
+            z-index: 1000;
+            transform: translateY(8px);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+            text-align: center;
         }
 
         .popup.visible {
             opacity: .95;
+            transform: translateY(0);
+        }
+
+        /* Mobile popup adjustments */
+        @media (max-width: 768px) {
+            .popup {
+                padding: 10px 12px;
+                max-width: 85vw;
+                font-size: 13px;
+                margin: 0 10px;
+            }
+        }
+
+        /* LOADING OVERLAY */
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #8f826c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+
+        #loading.fade-out {
+            opacity: 0;
+        }
+
+        .loading-text {
+            color: rgba(40, 36, 30, 0.6);
+            font-family: "Georgia", serif;
+            font-size: clamp(16px, 2vw, 20px);
+            letter-spacing: 2px;
+            font-style: italic;
+        }
+
+        /* TOUCH INDICATOR FOR MOBILE */
+        .touch-hint {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(40, 36, 30, 0.4);
+            font-size: 13px;
+            text-align: center;
+            opacity: 0.7;
+            animation: pulse 3s infinite;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.4;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .touch-hint {
+                bottom: 20px;
+                font-size: 12px;
+            }
         }
     </style>
 </head>
 
 <body>
-
+    <div id="date-container"></div>
     <div id="popup" class="popup"></div>
+
+    <div id="loading">
+        <div class="loading-text">carved in time</div>
+    </div>
+
+    <div class="touch-hint">drag to explore • touch dates</div>
 
     <script>
         /* ADD DATES HERE — ANY FORMAT */
         const datesData = [
             { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." },
-            { value: "12-Feb-2020", text: "Met with love." }
+            { value: "14-Mar-2018", text: "Journey began." },
+            { value: "25-Jul-2019", text: "Paths crossed." },
+            { value: "03-Nov-2021", text: "Changed direction." },
+            { value: "18-Apr-2017", text: "First steps taken." },
+            { value: "29-Sep-2022", text: "New chapter opened." },
+            { value: "07-Jan-2016", text: "Silence broken." },
+            { value: "22-Dec-2023", text: "Cycle completed." },
+            { value: "08-May-2015", text: "Doors opened." },
+            { value: "16-Oct-2018", text: "Lessons learned." },
+            { value: "30-Jun-2020", text: "Balance found." },
+            { value: "11-Aug-2019", text: "Connections made." },
+            { value: "05-Mar-2021", text: "Perspective shifted." },
+            { value: "27-Feb-2017", text: "Found strength." },
+            { value: "19-Nov-2022", text: "Let go." },
+            { value: "01-Sep-2014", text: "Started anew." },
+            { value: "23-Jul-2021", text: "Understood purpose." },
+            { value: "09-Apr-2016", text: "Found patience." },
+            { value: "14-Oct-2023", text: "Accepted change." },
+            { value: "06-Dec-2018", text: "Found peace." }
         ];
 
-        const popup = document.getElementById("popup");
+        class ResponsiveAncientDates {
+            constructor() {
+                this.container = document.getElementById('date-container');
+                this.popup = document.getElementById('popup');
+                this.loading = document.getElementById('loading');
+                this.activeDate = null;
+                this.isDragging = false;
+                this.startX = 0;
+                this.startY = 0;
+                this.scrollLeft = 0;
+                this.scrollTop = 0;
+                this.placed = [];
+                this.MIN_DIST = 140;
+                this.canvasWidth = 0;
+                this.canvasHeight = 0;
+                this.isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-        /* AUTO SPACING ON SCREEN */
-        const placed = [];
-        const MIN_DIST = 140;
+                this.init();
+            }
 
-        function findSpot() {
-            let x, y, ok, tries = 0;
-            do {
-                ok = true;
-                x = Math.random() * (window.innerWidth - 200);
-                y = Math.random() * (window.innerHeight - 100);
-                for (const p of placed) {
-                    if (Math.hypot(p.x - x, p.y - y) < MIN_DIST) {
-                        ok = false; break;
-                    }
+            init() {
+                this.calculateCanvasSize();
+                this.createDates();
+                this.setupEventListeners();
+                this.centerView();
+
+                // Hide loading after a moment
+                setTimeout(() => {
+                    this.loading.classList.add('fade-out');
+                    setTimeout(() => {
+                        this.loading.style.display = 'none';
+                    }, 500);
+                }, 800);
+            }
+
+            calculateCanvasSize() {
+                // Dynamic canvas size based on screen
+                const screenWidth = window.innerWidth;
+                const screenHeight = window.innerHeight;
+
+                if (this.isMobile) {
+                    this.canvasWidth = Math.max(2000, screenWidth * 3);
+                    this.canvasHeight = Math.max(2000, screenHeight * 3);
+                } else {
+                    this.canvasWidth = Math.max(3000, screenWidth * 2.5);
+                    this.canvasHeight = Math.max(3000, screenHeight * 2.5);
                 }
-                tries++;
-            } while (!ok && tries < 200);
-            placed.push({ x, y });
-            return { x, y };
+
+                this.container.style.width = this.canvasWidth + 'px';
+                this.container.style.height = this.canvasHeight + 'px';
+            }
+
+            findSpot() {
+                let x, y, ok, tries = 0;
+                const padding = 100;
+
+                do {
+                    ok = true;
+                    x = padding + Math.random() * (this.canvasWidth - padding * 2);
+                    y = padding + Math.random() * (this.canvasHeight - padding * 2);
+
+                    for (const p of this.placed) {
+                        const distance = Math.hypot(p.x - x, p.y - y);
+                        if (distance < this.MIN_DIST * (this.isMobile ? 0.8 : 1)) {
+                            ok = false;
+                            break;
+                        }
+                    }
+                    tries++;
+                } while (!ok && tries < 200);
+
+                if (ok) {
+                    this.placed.push({ x, y });
+                    return { x, y };
+                }
+
+                // Fallback: place anyway but with offset
+                x = padding + Math.random() * (this.canvasWidth - padding * 2);
+                y = padding + Math.random() * (this.canvasHeight - padding * 2);
+                this.placed.push({ x, y });
+                return { x, y };
+            }
+
+            createDates() {
+                // Create multiple copies for more dates
+                const totalDates = this.isMobile ? 40 : 60;
+                const dateCopies = [];
+
+                for (let i = 0; i < totalDates; i++) {
+                    const sourceIndex = i % datesData.length;
+                    dateCopies.push({ ...datesData[sourceIndex] });
+                }
+
+                dateCopies.forEach((item, index) => {
+                    const { x, y } = this.findSpot();
+                    const d = document.createElement("div");
+                    d.className = "date";
+                    d.textContent = item.value;
+                    d.dataset.text = item.text;
+
+                    // Random weathering
+                    const r = Math.random();
+                    let wear = r < 0.5 ? 0.85 : r < 0.8 ? 0.6 : 0.4;
+
+                    // Position
+                    d.style.left = x + "px";
+                    d.style.top = y + "px";
+                    d.style.opacity = wear;
+
+                    // Random rotation
+                    const rotation = Math.random() * 24 - 12;
+                    d.style.transform = `rotate(${rotation}deg) scale(${0.9 + Math.random() * 0.3})`;
+
+                    // Add blur for heavily worn dates
+                    if (wear < 0.5) d.style.filter = "blur(.35px)";
+
+                    // Event listeners
+                    if (this.isMobile) {
+                        d.addEventListener("touchstart", (e) => this.handleDateTouch(e, d, item));
+                    } else {
+                        d.addEventListener("mouseenter", (e) => this.showPopup(e, d, item));
+                        d.addEventListener("mouseleave", () => this.hidePopup(d, wear));
+                        d.addEventListener("mousemove", (e) => this.movePopup(e));
+                    }
+
+                    this.container.appendChild(d);
+                });
+            }
+
+            showPopup(event, dateEl, item) {
+                if (this.activeDate === dateEl) return;
+
+                this.hidePopup();
+                this.activeDate = dateEl;
+
+                dateEl.style.opacity = 1;
+                dateEl.style.transform = dateEl.style.transform.replace('scale(', 'scale(1.05)');
+
+                this.popup.textContent = item.text;
+
+                // Position popup intelligently
+                const rect = dateEl.getBoundingClientRect();
+                const popupWidth = this.popup.offsetWidth;
+                const popupHeight = this.popup.offsetHeight;
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+
+                let left = rect.left + rect.width / 2 - popupWidth / 2;
+                let top = rect.bottom + 10;
+
+                // Adjust for screen edges
+                if (left < 10) left = 10;
+                if (left + popupWidth > viewportWidth - 10) {
+                    left = viewportWidth - popupWidth - 10;
+                }
+
+                // If popup would go below screen, show above
+                if (top + popupHeight > viewportHeight - 10) {
+                    top = rect.top - popupHeight - 10;
+                }
+
+                // If still problematic, show at cursor
+                if (top < 10) {
+                    left = event.clientX + 14;
+                    top = event.clientY + 14;
+                }
+
+                this.popup.style.left = left + "px";
+                this.popup.style.top = top + "px";
+                this.popup.classList.add("visible");
+            }
+
+            movePopup(event) {
+                if (!this.activeDate) return;
+
+                // Follow mouse with offset
+                const popupWidth = this.popup.offsetWidth;
+                const viewportWidth = window.innerWidth;
+
+                let left = event.clientX + 14;
+                let top = event.clientY + 14;
+
+                // Keep popup on screen
+                if (left + popupWidth > viewportWidth - 10) {
+                    left = event.clientX - popupWidth - 14;
+                }
+                if (top + 100 > window.innerHeight - 10) {
+                    top = event.clientY - 100;
+                }
+
+                this.popup.style.left = left + "px";
+                this.popup.style.top = top + "px";
+            }
+
+            hidePopup(dateEl, originalOpacity) {
+                if (dateEl) {
+                    dateEl.style.opacity = originalOpacity || 0.45;
+                    dateEl.style.transform = dateEl.style.transform.replace('scale(1.05)', 'scale(1)');
+                }
+                this.popup.classList.remove("visible");
+                this.activeDate = null;
+            }
+
+            handleDateTouch(event, dateEl, item) {
+                event.stopPropagation();
+                event.preventDefault();
+
+                if (this.activeDate === dateEl) {
+                    this.hidePopup(dateEl, parseFloat(dateEl.style.opacity));
+                    return;
+                }
+
+                this.hidePopup();
+                this.activeDate = dateEl;
+
+                const touch = event.touches[0];
+                dateEl.style.opacity = 1;
+                dateEl.style.transform = dateEl.style.transform.replace('scale(', 'scale(1.05)');
+
+                this.popup.textContent = item.text;
+
+                // Position popup for touch
+                const popupWidth = Math.min(220, window.innerWidth * 0.8);
+                const popupHeight = 80;
+                let left = touch.clientX - popupWidth / 2;
+                let top = touch.clientY - popupHeight - 20;
+
+                // Adjust for screen edges
+                if (left < 10) left = 10;
+                if (left + popupWidth > window.innerWidth - 10) {
+                    left = window.innerWidth - popupWidth - 10;
+                }
+                if (top < 10) {
+                    top = touch.clientY + 30;
+                }
+
+                this.popup.style.left = left + "px";
+                this.popup.style.top = top + "px";
+                this.popup.classList.add("visible");
+
+                // Auto-hide after delay on mobile
+                clearTimeout(this.touchTimer);
+                this.touchTimer = setTimeout(() => {
+                    this.hidePopup(dateEl, parseFloat(dateEl.style.opacity));
+                }, 3000);
+            }
+
+            setupEventListeners() {
+                // Mouse dragging
+                this.container.addEventListener("mousedown", (e) => {
+                    if (e.target.classList.contains("date")) return;
+
+                    this.isDragging = true;
+                    this.startX = e.pageX - this.container.offsetLeft;
+                    this.startY = e.pageY - this.container.offsetTop;
+                    this.scrollLeft = this.container.scrollLeft;
+                    this.scrollTop = this.container.scrollTop;
+                    this.container.style.cursor = "grabbing";
+                    this.hidePopup();
+
+                    e.preventDefault();
+                });
+
+                document.addEventListener("mousemove", (e) => {
+                    if (!this.isDragging) return;
+
+                    e.preventDefault();
+                    const x = e.pageX - this.container.offsetLeft;
+                    const y = e.pageY - this.container.offsetTop;
+                    const walkX = (x - this.startX) * 1.5;
+                    const walkY = (y - this.startY) * 1.5;
+
+                    this.container.style.transform =
+                        `translate(calc(-50% + ${walkX}px), calc(-50% + ${walkY}px))`;
+                });
+
+                document.addEventListener("mouseup", () => {
+                    this.isDragging = false;
+                    this.container.style.cursor = "grab";
+                });
+
+                // Touch dragging for mobile
+                let touchStartX = 0;
+                let touchStartY = 0;
+                let isTouchDragging = false;
+
+                this.container.addEventListener("touchstart", (e) => {
+                    if (e.target.classList.contains("date")) return;
+
+                    const touch = e.touches[0];
+                    touchStartX = touch.clientX;
+                    touchStartY = touch.clientY;
+                    isTouchDragging = true;
+                    this.hidePopup();
+
+                    e.preventDefault();
+                }, { passive: false });
+
+                this.container.addEventListener("touchmove", (e) => {
+                    if (!isTouchDragging) return;
+
+                    const touch = e.touches[0];
+                    const deltaX = touch.clientX - touchStartX;
+                    const deltaY = touch.clientY - touchStartY;
+
+                    const currentTransform = this.container.style.transform;
+                    const match = currentTransform.match(/translate\(calc\(-50% \+ ([\d.-]+)px\), calc\(-50% \+ ([\d.-]+)px\)\)/);
+
+                    let currentX = match ? parseFloat(match[1]) : 0;
+                    let currentY = match ? parseFloat(match[2]) : 0;
+
+                    this.container.style.transform =
+                        `translate(calc(-50% + ${currentX + deltaX}px), calc(-50% + ${currentY + deltaY}px))`;
+
+                    touchStartX = touch.clientX;
+                    touchStartY = touch.clientY;
+
+                    e.preventDefault();
+                }, { passive: false });
+
+                this.container.addEventListener("touchend", () => {
+                    isTouchDragging = false;
+                });
+
+                // Close popup when clicking/tapping elsewhere
+                document.addEventListener("click", (e) => {
+                    if (!e.target.classList.contains("date")) {
+                        this.hidePopup();
+                    }
+                });
+
+                document.addEventListener("touchstart", (e) => {
+                    if (!e.target.classList.contains("date")) {
+                        this.hidePopup();
+                    }
+                });
+
+                // Handle window resize
+                window.addEventListener("resize", () => {
+                    this.hidePopup();
+                });
+
+                // Prevent context menu
+                document.addEventListener("contextmenu", (e) => {
+                    e.preventDefault();
+                });
+            }
+
+            centerView() {
+                this.container.style.transform = "translate(-50%, -50%)";
+            }
         }
 
-        /* CREATE DATES */
-        datesData.forEach(item => {
-            const { x, y } = findSpot();
-            const d = document.createElement("div");
-            d.className = "date";
-            d.textContent = item.value;
-
-            const r = Math.random();
-            let wear = r < 0.5 ? 0.85 : r < 0.8 ? 0.6 : 0.4;
-
-            d.style.left = x + "px";
-            d.style.top = y + "px";
-            d.style.fontSize = (18 + Math.random() * 10) + "px";
-            d.style.opacity = wear;
-            d.style.transform = `rotate(${Math.random() * 24 - 12}deg)`;
-
-            if (wear < 0.5) d.style.filter = "blur(.35px)";
-
-            d.addEventListener("mouseenter", e => {
-                d.style.opacity = 1;
-                popup.textContent = item.text;
-                popup.style.left = e.clientX + 14 + "px";
-                popup.style.top = e.clientY + 14 + "px";
-                popup.style.transform = `rotate(${Math.random() * 2 - 1}deg)`;
-                popup.classList.add("visible");
-            });
-
-            d.addEventListener("mousemove", e => {
-                popup.style.left = e.clientX + 14 + "px";
-                popup.style.top = e.clientY + 14 + "px";
-            });
-
-            d.addEventListener("mouseleave", () => {
-                d.style.opacity = wear;
-                popup.classList.remove("visible");
-            });
-
-            document.body.appendChild(d);
+        // Initialize when page loads
+        document.addEventListener("DOMContentLoaded", () => {
+            new ResponsiveAncientDates();
         });
     </script>
 
