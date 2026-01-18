@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Ancient Dates</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: "Georgia", serif;
+        }
+
+        /* ANCIENT BACKGROUND (FIXED) */
+        body {
+            background:
+                radial-gradient(circle at 30% 20%, rgba(90, 75, 55, .35), transparent 55%),
+                radial-gradient(circle at 70% 70%, rgba(70, 60, 45, .25), transparent 60%),
+                repeating-linear-gradient(45deg,
+                    rgba(0, 0, 0, .035) 0px,
+                    rgba(0, 0, 0, .035) 1px,
+                    transparent 1px,
+                    transparent 5px),
+                #8f826c;
+        }
+
+        /* VIGNETTE + GRAIN */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(circle, transparent 55%, rgba(0, 0, 0, .45) 100%),
+                repeating-linear-gradient(0deg,
+                    rgba(0, 0, 0, .03) 0px,
+                    rgba(0, 0, 0, .03) 1px,
+                    transparent 1px,
+                    transparent 3px);
+            mix-blend-mode: multiply;
+        }
+
+        /* DATE */
+        .date {
+            position: absolute;
+            white-space: nowrap;
+            color: rgba(40, 36, 30, .9);
+            letter-spacing: 1.4px;
+            user-select: none;
+            cursor: default;
+            opacity: 0.45;
+            text-shadow:
+                1px 1px 0 rgba(25, 22, 18, .95),
+                2px 2px 1px rgba(0, 0, 0, .35),
+                -1px -1px 0 rgba(220, 210, 185, .35);
+            transition: opacity .15s ease;
+        }
+
+        /* POPUP */
+        .popup {
+            position: fixed;
+            max-width: 220px;
+            padding: 12px 14px;
+            font-size: 13px;
+            line-height: 1.4;
+            color: #2e2a23;
+            background:
+                repeating-linear-gradient(90deg,
+                    rgba(0, 0, 0, .04) 0px,
+                    rgba(0, 0, 0, .04) 1px,
+                    transparent 1px,
+                    transparent 6px),
+                #efe6cf;
+            border-radius: 1px;
+            box-shadow:
+                1px 1px 0 rgba(0, 0, 0, .2),
+                4px 6px 14px rgba(0, 0, 0, .3);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .15s ease;
+        }
+
+        .popup.visible {
+            opacity: .95;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="popup" class="popup"></div>
+
+    <script>
+        /* ADD DATES HERE — ANY FORMAT */
+        const datesData = [
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." },
+            { value: "12-Feb-2020", text: "Met with love." }
+        ];
+
+        const popup = document.getElementById("popup");
+
+        /* AUTO SPACING ON SCREEN */
+        const placed = [];
+        const MIN_DIST = 140;
+
+        function findSpot() {
+            let x, y, ok, tries = 0;
+            do {
+                ok = true;
+                x = Math.random() * (window.innerWidth - 200);
+                y = Math.random() * (window.innerHeight - 100);
+                for (const p of placed) {
+                    if (Math.hypot(p.x - x, p.y - y) < MIN_DIST) {
+                        ok = false; break;
+                    }
+                }
+                tries++;
+            } while (!ok && tries < 200);
+            placed.push({ x, y });
+            return { x, y };
+        }
+
+        /* CREATE DATES */
+        datesData.forEach(item => {
+            const { x, y } = findSpot();
+            const d = document.createElement("div");
+            d.className = "date";
+            d.textContent = item.value;
+
+            const r = Math.random();
+            let wear = r < 0.5 ? 0.85 : r < 0.8 ? 0.6 : 0.4;
+
+            d.style.left = x + "px";
+            d.style.top = y + "px";
+            d.style.fontSize = (18 + Math.random() * 10) + "px";
+            d.style.opacity = wear;
+            d.style.transform = `rotate(${Math.random() * 24 - 12}deg)`;
+
+            if (wear < 0.5) d.style.filter = "blur(.35px)";
+
+            d.addEventListener("mouseenter", e => {
+                d.style.opacity = 1;
+                popup.textContent = item.text;
+                popup.style.left = e.clientX + 14 + "px";
+                popup.style.top = e.clientY + 14 + "px";
+                popup.style.transform = `rotate(${Math.random() * 2 - 1}deg)`;
+                popup.classList.add("visible");
+            });
+
+            d.addEventListener("mousemove", e => {
+                popup.style.left = e.clientX + 14 + "px";
+                popup.style.top = e.clientY + 14 + "px";
+            });
+
+            d.addEventListener("mouseleave", () => {
+                d.style.opacity = wear;
+                popup.classList.remove("visible");
+            });
+
+            document.body.appendChild(d);
+        });
+    </script>
+
+</body>
+
+</html>
